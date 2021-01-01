@@ -18,7 +18,9 @@ class Rewritem600Plugin(
     octoprint.plugin.TemplatePlugin,
     octoprint.plugin.SettingsPlugin,
 ):
-    self.last_position = PositionRecord()
+
+    def __init__(self):
+        self.last_position = PositionRecord()
 
     def rewrite_m600(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
         if gcode and gcode == "M600":
