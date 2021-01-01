@@ -22,6 +22,9 @@ class Rewritem600Plugin(
     def __init__(self):
         self.last_position = PositionRecord()
 
+    def on_after_startup(self):
+        self._logger.info("Hello World!")
+
     def rewrite_m600(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
         if gcode and gcode == "M600":
             self._plugin_manager.send_plugin_message(
