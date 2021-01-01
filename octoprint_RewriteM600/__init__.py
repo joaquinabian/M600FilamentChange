@@ -27,11 +27,13 @@ class Rewritem600Plugin(
             )
             comm_instance.setPause(True)
             cmd = [
-                ("M117 Filament Change",),
+                ("M117 Filament Change",),  # LCD message
+                "M300 S440 P100",  # Beep
                 "G91",  # relative positioning
                 "M83",  # relative E
                 "G1 Z" + str(self._settings.get(["zDistance"])) +
-                " E-" + str(self._settings.get(["retractDistance"])),
+                " E-" + \
+                str(self._settings.get(["retractDistance"])) + " F4500",
                 "M82",  # absolute E
                 "G90",  # absolute position
                 "G1 X" + str(self._settings.get(["toolChangeX"])) + " Y" + str(
@@ -52,13 +54,11 @@ class Rewritem600Plugin(
             if comm_instance.pause_position.x:
                 cmd = []
                 if self._settings.get_boolean(["DisableSteppers"]):
-                    cmd.append("M17 " + ("X" if self._settings.get(["DisableX"]) else "") +
-                               ("Y " if self._settings.get(["DisableY"]) else "") +
-                               ("Z "if self._settings.get(["DisableZ"]) else "") +
-                               ("E" if self._settings.get(["DisableE"]) else ""))
+                    cmd.append("M17")  # resume all steppers
                 # cmd.append("G91")  # relative positioning
                 # cmd.append("G1 Z" + str(self._settings.get(["zDistance"])))
                 cmd.append("G90")  # Absolute Positioning
+                cmd.append("M83")  # relative E
                 cmd.append("G1 X"
                            + str(comm_instance.pause_position.x)
                            + " Y"
@@ -66,10 +66,12 @@ class Rewritem600Plugin(
                            + " Z"
                            + str(comm_instance.pause_position.z)
                            + " F4500")
+                cmd.append("M300 S440 P100")  # Beep
 
                 if comm_instance.pause_position.f:
                     cmd.append("G1 F" + str(comm_instance.pause_position.f))
                 comm_instance.commands(cmd)
+
             comm_instance.setPause(False)
         return
 
