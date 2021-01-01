@@ -56,8 +56,8 @@ class Rewritem600Plugin(
                                ("Y " if self._settings.get(["DisableY"]) else "") +
                                ("Z "if self._settings.get(["DisableZ"]) else "") +
                                ("E" if self._settings.get(["DisableE"]) else ""))
-                cmd.append("G91")  # relative positioning
-                cmd.append("G1 Z" + str(self._settings.get(["zDistance"])))
+                # cmd.append("G91")  # relative positioning
+                # cmd.append("G1 Z" + str(self._settings.get(["zDistance"])))
                 cmd.append("G90")  # Absolute Positioning
                 cmd.append("G1 X"
                            + str(comm_instance.pause_position.x)
