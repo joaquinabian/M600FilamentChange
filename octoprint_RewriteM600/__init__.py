@@ -30,7 +30,7 @@ class Rewritem600Plugin(
                 ("M117 Filament Change",),
                 "G91",  # relative positioning
                 "M83",  # relative E
-                "G1 Z" + str(self._settings.get(["zDistance"])) + \
+                "G1 Z" + str(self._settings.get(["zDistance"])) +
                 " E" + str(self._settings.get(["retractDistance"])),
                 "M82",  # absolute E
                 "G90",  # absolute position
@@ -38,7 +38,7 @@ class Rewritem600Plugin(
                     self._settings.get(["toolChangeY"]))  # go to filament change location
             ]
             if self._settings.get_boolean(["DisableSteppers"]):
-                cmd.append("M18 " + "X " if self._settings.get(["DisableX"]) else "" +
+                cmd.append("M18 X " if self._settings.get(["DisableX"]) else "M18 " +
                            "Y " if self._settings.get(["DisableY"]) else "" +
                            "Z " if self._settings.get(["DisableZ"]) else "" +
                            "E" if self._settings.get(["DisableE"]) else "")
