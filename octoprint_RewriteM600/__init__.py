@@ -10,6 +10,7 @@ from __future__ import absolute_import
 # Take a look at the documentation on what other plugin mixins are available.
 
 import octoprint.plugin
+from octoprint.util.comm import PositionRecord
 
 
 class Rewritem600Plugin(
@@ -17,6 +18,8 @@ class Rewritem600Plugin(
     octoprint.plugin.TemplatePlugin,
     octoprint.plugin.SettingsPlugin,
 ):
+    self.last_position = PositionRecord()
+
     def rewrite_m600(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
         if gcode and gcode == "M600":
             self._plugin_manager.send_plugin_message(
@@ -25,6 +28,7 @@ class Rewritem600Plugin(
                     type="popup", msg="Please change the filament and resume the print"
                 ),
             )
+            self.last_position.copy_from(comm_instance.last_position)
             comm_instance.setPause(True)
             cmd = [
                 ("M117 Filament Change",),  # LCD message
@@ -50,11 +54,17 @@ class Rewritem600Plugin(
     def after_resume(
         self, comm_instance, phase, cmd, parameters, tags=None, *args, **kwargs
     ):
+        self._logger.info("ROTTEV: cmd " + cmd)
         if cmd and cmd == "resume":
             self._logger.info("ROTTEV: after_resume and cmd == resume")
+            self._logger.info(
+                "ROTTEV: after_resume last_position x" +
+                str(self.last_position.x) + " Z" + str(self.last_position.z))
             if comm_instance.pause_position.x:
                 self._logger.info(
-                    "ROTTEV: after_resume x" + comm_instance.pause_position.x + " Z" + comm_instance.pause_position.z)
+                    "ROTTEV: after_resume x" +
+                    str(comm_instance.pause_position.x) +
+                    " Z" + str(comm_instance.pause_position.z))
                 cmd = []
                 if self._settings.get_boolean(["DisableSteppers"]):
                     cmd.append("M17")  # resume all steppers
