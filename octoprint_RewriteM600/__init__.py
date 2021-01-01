@@ -1,7 +1,7 @@
 # coding=utf-8
 from __future__ import absolute_import
 
-### (Don't forget to remove me)
+# (Don't forget to remove me)
 # This is a basic skeleton for your plugin's __init__.py. You probably want to adjust the class name of your plugin
 # as well as the plugin mixins it's subclassing from. This is really just a basic skeleton to get you started,
 # defining your plugin as a template plugin, settings and asset plugin. Feel free to add or remove mixins
@@ -29,10 +29,20 @@ class Rewritem600Plugin(
             cmd = [
                 ("M117 Filament Change",),
                 "G91",  # relative positioning
-                "G1 Z" + str(self._settings.get(["zDistance"])),
+                "M83",  # relative E
+                "G1 Z" + str(self._settings.get(["zDistance"])) + \
+                " E" + str(self._settings.get(["retractDistance"])),
+                "M82",  # absolute E
                 "G90",  # absolute position
-                "G1 X" + str(self._settings.get(["toolChangeX"]) + " Y" + str(self._settings.get(["toolChangeY"]), # go to filament change location
+                "G1 X" + str(self._settings.get(["toolChangeX"])) + " Y" + str(
+                    self._settings.get(["toolChangeY"]))  # go to filament change location
             ]
+            if self._settings.get_boolean(["DisableSteppers"]):
+                cmd.append("M18 " + "X " if self._settings.get(["DisableX"]) else "" +
+                           "Y " if self._settings.get(["DisableY"]) else "" +
+                           "Z " if self._settings.get(["DisableZ"]) else "" +
+                           "E" if self._settings.get(["DisableE"]) else "")
+
         return cmd
 
     def after_resume(
@@ -41,18 +51,22 @@ class Rewritem600Plugin(
         if cmd and cmd == "resume":
             if comm_instance.pause_position.x:
                 cmd = []
-                cmd = [
-                    "G91",  # relative positioning
-                    "G1 Z" + str(self._settings.get(["zDistance"])),
-                    "G90",  # Absolute Positioning
-                    "G1 X"
-                    + str(comm_instance.pause_position.x)
-                    + " Y"
-                    + str(comm_instance.pause_position.y)
-                    + " Z"
-                    + str(comm_instance.pause_position.z)
-                    + " F4500",
-                ]
+                if self._settings.get_boolean(["DisableSteppers"]):
+                    cmd.append("M17 " + "X " if self._settings.get(["DisableX"]) else "" +
+                               "Y " if self._settings.get(["DisableY"]) else "" +
+                               "Z " if self._settings.get(["DisableZ"]) else "" +
+                               "E" if self._settings.get(["DisableE"]) else "")
+                cmd.append("G91")  # relative positioning
+                cmd.append("G1 Z" + str(self._settings.get(["zDistance"])))
+                cmd.append("G90")  # Absolute Positioning
+                cmd.append("G1 X"
+                           + str(comm_instance.pause_position.x)
+                           + " Y"
+                           + str(comm_instance.pause_position.y)
+                           + " Z"
+                           + str(comm_instance.pause_position.z)
+                           + " F4500")
+
                 if comm_instance.pause_position.f:
                     cmd.append("G1 F" + str(comm_instance.pause_position.f))
                 comm_instance.commands(cmd)
@@ -60,7 +74,15 @@ class Rewritem600Plugin(
         return
 
     def get_settings_defaults(self):
-        return dict(zDistance=5, toolChangeX=151.9, toolChangeY=0)
+        return dict(zDistance=50,
+                    toolChangeX=0,
+                    toolChangeY=0,
+                    retractDistance=5,
+                    DisableSteppers=False,
+                    DisableX=False,
+                    DisableY=False,
+                    DisableZ=False,
+                    DisableE=False)
 
     def get_template_configs(self):
         return [
@@ -68,7 +90,7 @@ class Rewritem600Plugin(
             dict(type="settings", custom_bindings=False),
         ]
 
-    ##~~ AssetPlugin mixin
+    # ~~ AssetPlugin mixin
 
     def get_assets(self):
         # Define your plugin's asset files to automatically include in the
@@ -79,7 +101,7 @@ class Rewritem600Plugin(
             less=["less/RewriteM600.less"],
         )
 
-    ##~~ Softwareupdate hook
+    # ~~ Softwareupdate hook
 
     def get_update_information(self):
         # Define the configuration for your plugin to use with the Software Update

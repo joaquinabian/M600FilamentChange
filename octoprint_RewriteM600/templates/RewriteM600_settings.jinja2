@@ -4,17 +4,31 @@
         <div class="controls">
             <input type="number" class="input-block-level" data-bind="value: settings.plugins.RewriteM600.zDistance">
         </div>
-        <label class="control-label">{{ _('Z-Distance(mm): ') }}</label>
+        <label class="control-label">{{ _('Retract Amount (mm): ') }}</label>
         <div class="controls">
-            <input type="number" class="input-block-level" data-bind="value: settings.plugins.RewriteM600.zDistance">
+            <input type="number" class="input-block-level" data-bind="value: settings.plugins.RewriteM600.retractDistance">
         </div>
-        <label class="control-label">{{ _('Tool Change X (mm): ') }}</label>
+        <label class="control-label">{{ _('Park head X (mm): ') }}</label>
         <div class="controls">
             <input type="number" class="input-block-level" data-bind="value: settings.plugins.RewriteM600.toolChangeX">
         </div>
-        <label class="control-label">{{ _('Tool Change Y (mm): ') }}</label>
+        <label class="control-label">{{ _('Park head Y (mm): ') }}</label>
         <div class="controls">
             <input type="number" class="input-block-level" data-bind="value: settings.plugins.RewriteM600.toolChangeY">
+        </div>
+
+    </div>
+     <div class="control-group">
+        <div class="controls">
+            <label class="checkbox">
+                <input type="checkbox" data-bind="checked: settings.plugins.RewriteM600.DisableSteppers" > Disable Steppers
+                    <label class="checkbox">
+                        <input type="checkbox" data-bind="checked: settings.plugins.RewriteM600.DisableX, enable: settings.plugins.RewriteM600.DisableSteppers" > Disable X
+                        <input type="checkbox" data-bind="checked: settings.plugins.RewriteM600.DisableY, enable: settings.plugins.RewriteM600.DisableSteppers" > Disable Y
+                        <input type="checkbox" data-bind="checked: settings.plugins.RewriteM600.DisableZ, enable: settings.plugins.RewriteM600.DisableSteppers" > Disable Z
+                        <input type="checkbox" data-bind="checked: settings.plugins.RewriteM600.DisableE, enable: settings.plugins.RewriteM600.DisableSteppers" > Disable E
+                    </label>
+            </label>
         </div>
     </div>
 </form>
