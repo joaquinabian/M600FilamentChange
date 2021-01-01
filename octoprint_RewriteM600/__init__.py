@@ -51,7 +51,10 @@ class Rewritem600Plugin(
         self, comm_instance, phase, cmd, parameters, tags=None, *args, **kwargs
     ):
         if cmd and cmd == "resume":
+            self._logger.info("ROTTEV: after_resume and cmd == resume")
             if comm_instance.pause_position.x:
+                self._logger.info(
+                    "ROTTEV: after_resume x" + comm_instance.pause_position.x + " Z" + comm_instance.pause_position.z)
                 cmd = []
                 if self._settings.get_boolean(["DisableSteppers"]):
                     cmd.append("M17")  # resume all steppers
