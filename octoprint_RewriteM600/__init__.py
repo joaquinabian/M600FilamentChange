@@ -28,6 +28,7 @@ class Rewritem600Plugin(
 
     def rewrite_m600(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
         if gcode and gcode == "M600":
+            self._logger.info("rewrite_m600 gcode: " + gcode)
             self._plugin_manager.send_plugin_message(
                 self._identifier,
                 dict(
@@ -61,12 +62,18 @@ class Rewritem600Plugin(
         self, comm_instance, phase, cmd, parameters, tags=None, *args, **kwargs
     ):
         self._logger.info("test_hoook")
+        self._plugin_manager.send_plugin_message(
+            self._identifier,
+            dict(
+                type="popup", msg="test_hoook: " + cmd
+            ),
+        )
         return
 
     def after_resume(
         self, comm_instance, phase, cmd, parameters, tags=None, *args, **kwargs
     ):
-        self._logger.info("ROTTEV: cmd " + str(cmd))
+        self._logger.info("ROTTEV: cmd " + cmd)
         if cmd and cmd == "resume":
             self._logger.info("ROTTEV: after_resume and cmd == resume")
             self._logger.info(
