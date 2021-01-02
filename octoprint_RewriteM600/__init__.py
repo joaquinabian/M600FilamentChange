@@ -78,7 +78,7 @@ class Rewritem600Plugin(
                 "ROTTEV: pause_position x" +
                 str(comm_instance.pause_position.x) +
                 " Z" + str(comm_instance.pause_position.z))
-            postfix = None
+            postix = None
             prefix = []
             if self._settings.get_boolean(["DisableSteppers"]):
                 prefix.append("M17")  # resume all steppers
@@ -97,14 +97,14 @@ class Rewritem600Plugin(
 
             if self.pause_position.f:
                 prefix.append("G1 F" + str(self.pause_position.f))
-            return prefix, postfix
+            return prefix, postix
         if script_type == "gcode" and script_name == "afterPrintPaused" and self.fillamentSwap:
 
             self.pause_position.copy_from(comm_instance.pause_position)
             self._logger.info(
                 "ROTTEV: self.pause_position x" +
                 str(self.pause_position.x) + " Z" + str(self.pause_position.z))
-            postfix = None
+            postix = None
             prefix = []
             prefix = [
                 "G91",  # relative positioning
@@ -124,9 +124,17 @@ class Rewritem600Plugin(
                               (" Y" if self._settings.get(["DisableY"]) else "") +
                               (" Z "if self._settings.get(["DisableZ"]) else "") +
                               (" E" if self._settings.get(["DisableE"]) else ""))
+            if self._settings.get_boolean(["PostixEnableSteppers"]) and elf._settings.get_boolean(["DisableSteppers"]):
+                postix = []
+                postix.append("M17" + (" X" if not self._settings.get(["DisableX"]) else "") +
+                              (" Y" if not self._settings.get(["DisableY"]) else "") +
+                              (" Z "if not self._settings.get(["DisableZ"]) else "") +
+                              (" E" if not self._settings.get(["DisableE"]) else ""))
+
             self._logger.info("prefix: " + ", ".join(prefix))
+            self._logger.info("prefix: " + ", ".join(postix))
             # comm_instance.commands(prefix)
-            return prefix, postfix
+            return prefix, postix
         return None
 
     def test_hoook(
@@ -187,7 +195,8 @@ class Rewritem600Plugin(
                     DisableX=False,
                     DisableY=False,
                     DisableZ=False,
-                    DisableE=False)
+                    DisableE=False,
+                    PostixEnableSteppers=False)
 
     def get_template_configs(self):
         return [
