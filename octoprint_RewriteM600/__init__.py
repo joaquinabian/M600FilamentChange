@@ -66,7 +66,8 @@ class Rewritem600Plugin(
                           script_name, *args, **kwargs):
         self._logger.info("test_hook_script " +
                           script_type + ":" + script_name)
-        if script_type == "gcode" and script_name == "beforePrintResumed":
+        if script_type == "gcode" and script_name == "beforePrintResumed" and self.fillamentSwap:
+            self.fillamentSwap = False
             self._logger.info(
                 "ROTTEV: last_position x" +
                 str(self.last_position.x) + " Z" + str(self.last_position.z))
@@ -77,50 +78,55 @@ class Rewritem600Plugin(
                 "ROTTEV: pause_position x" +
                 str(comm_instance.pause_position.x) +
                 " Z" + str(comm_instance.pause_position.z))
-            cmd = []
+            postfix = None
+            prefix = []
             if self._settings.get_boolean(["DisableSteppers"]):
-                cmd.append("M17")  # resume all steppers
+                prefix.append("M17")  # resume all steppers
             # cmd.append("G91")  # relative positioning
             # cmd.append("G1 Z" + str(self._settings.get(["zDistance"])))
-            cmd.append("G90")  # Absolute Positioning
-            cmd.append("M83")  # relative E
-            cmd.append("G1 X"
-                       + str(self.pause_position.x)
-                       + " Y"
-                       + str(self.pause_position.y)
-                       + " Z"
-                       + str(self.pause_position.z)
-                       + " F4500")
-            cmd.append("M300 S440 P100")  # Beep
+            prefix.append("G90")  # Absolute Positioning
+            prefix.append("M83")  # relative E
+            prefix.append("G1 X"
+                          + str(self.pause_position.x)
+                          + " Y"
+                          + str(self.pause_position.y)
+                          + " Z"
+                          + str(self.pause_position.z)
+                          + " F4500")
+            prefix.append("M300 S440 P100")  # Beep
 
             if self.pause_position.f:
-                cmd.append("G1 F" + str(self.pause_position.f))
-            return cmd, None
+                prefix.append("G1 F" + str(self.pause_position.f))
+            return prefix, postfix
         if script_type == "gcode" and script_name == "afterPrintPaused" and self.fillamentSwap:
-            self.fillamentSwap = False
+
             self.pause_position.copy_from(comm_instance.pause_position)
             self._logger.info(
                 "ROTTEV: self.pause_position x" +
                 str(self.pause_position.x) + " Z" + str(self.pause_position.z))
-            cmd = []
-            cmd = [
+            postfix = None
+            prefix = []
+            prefix = [
                 "G91",  # relative positioning
                 "M83",  # relative E
-                "G1 Z" + str(self._settings.get(["zDistance"])) +
-                " E-" + \
-                str(self._settings.get(["retractDistance"])) + " F4500",
+                "G1 Z" +
+                str(self._settings.get(["zDistance"])) +
+                " E-" +
+                str(self._settings.get(["retractDistance"])) +
+                " F4500",
                 "M82",  # absolute E
                 "G90",  # absolute position
                 "G1 X" + str(self._settings.get(["toolChangeX"])) + " Y" + str(
                         self._settings.get(["toolChangeY"])) + " F9000"  # go to filament change location
             ]
             if self._settings.get_boolean(["DisableSteppers"]):
-                cmd.append("M18" + (" X" if self._settings.get(["DisableX"]) else "") +
-                           (" Y" if self._settings.get(["DisableY"]) else "") +
-                           (" Z "if self._settings.get(["DisableZ"]) else "") +
-                           (" E" if self._settings.get(["DisableE"]) else ""))
-            self._logger.info("cmd: ".join(cmd))
-            return cmd, None
+                prefix.append("M84" + (" X" if self._settings.get(["DisableX"]) else "") +
+                              (" Y" if self._settings.get(["DisableY"]) else "") +
+                              (" Z "if self._settings.get(["DisableZ"]) else "") +
+                              (" E" if self._settings.get(["DisableE"]) else ""))
+            self._logger.info("prefix: " + ", ".join(prefix))
+            # comm_instance.commands(prefix)
+            return prefix, postfix
         return None
 
     def test_hoook(
