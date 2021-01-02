@@ -109,10 +109,9 @@ class Rewritem600Plugin(
             prefix = [
                 "G91",  # relative positioning
                 "M83",  # relative E
+                "G1 E-" + str(self._settings.get(["retractDistance"])),
                 "G1 Z" +
                 str(self._settings.get(["zDistance"])) +
-                " E-" +
-                str(self._settings.get(["retractDistance"])) +
                 " F4500",
                 "M82",  # absolute E
                 "G90",  # absolute position
