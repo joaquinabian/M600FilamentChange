@@ -22,6 +22,7 @@ class Rewritem600Plugin(
 
     def __init__(self):
         self.last_position = PositionRecord()
+        self.fillamentSwap = False
 
     def on_after_startup(self):
         self._logger.info("Hello World!")
@@ -55,6 +56,7 @@ class Rewritem600Plugin(
                            ("Y " if self._settings.get(["DisableY"]) else "") +
                            ("Z "if self._settings.get(["DisableZ"]) else "") +
                            ("E" if self._settings.get(["DisableE"]) else ""))
+            self.fillamentSwap = True
 
         return cmd
 
@@ -62,6 +64,16 @@ class Rewritem600Plugin(
                           script_name, *args, **kwargs):
         self._logger.info("test_hook_script " +
                           script_type + ":" + script_name)
+        if not script_type == "gcode" or not script_name == "beforePrintResumed":
+            return None
+        self._logger.info(
+            "ROTTEV: last_position x" +
+            str(self.last_position.x) + " Z" + str(self.last_position.z))
+        self._logger.info(
+            "ROTTEV: pause_position x" +
+            str(comm_instance.pause_position.x) +
+            " Z" + str(comm_instance.pause_position.z))
+
         return None, None
 
     def test_hoook(
