@@ -14,6 +14,7 @@ from octoprint.util.comm import PositionRecord
 
 
 class Rewritem600Plugin(
+    octoprint.plugin.StartupPlugin,
     octoprint.plugin.AssetPlugin,
     octoprint.plugin.TemplatePlugin,
     octoprint.plugin.SettingsPlugin,
@@ -59,7 +60,7 @@ class Rewritem600Plugin(
     def after_resume(
         self, comm_instance, phase, cmd, parameters, tags=None, *args, **kwargs
     ):
-        self._logger.info("ROTTEV: cmd " + cmd)
+        self._logger.info("ROTTEV: cmd " + str(cmd))
         if cmd and cmd == "resume":
             self._logger.info("ROTTEV: after_resume and cmd == resume")
             self._logger.info(
