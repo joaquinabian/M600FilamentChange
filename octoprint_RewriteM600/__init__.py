@@ -124,7 +124,7 @@ class Rewritem600Plugin(
                               (" Y" if self._settings.get(["DisableY"]) else "") +
                               (" Z "if self._settings.get(["DisableZ"]) else "") +
                               (" E" if self._settings.get(["DisableE"]) else ""))
-            if self._settings.get_boolean(["PostixEnableSteppers"]) and elf._settings.get_boolean(["DisableSteppers"]):
+            if self._settings.get_boolean(["PostixEnableSteppers"]) and self._settings.get_boolean(["DisableSteppers"]):
                 postix = []
                 postix.append("M17" + (" X" if not self._settings.get(["DisableX"]) else "") +
                               (" Y" if not self._settings.get(["DisableY"]) else "") +
@@ -132,7 +132,8 @@ class Rewritem600Plugin(
                               (" E" if not self._settings.get(["DisableE"]) else ""))
 
             self._logger.info("prefix: " + ", ".join(prefix))
-            self._logger.info("prefix: " + ", ".join(postix))
+            if postix:
+                self._logger.info("postix: " + ", ".join(postix))
             # comm_instance.commands(prefix)
             return prefix, postix
         return None
