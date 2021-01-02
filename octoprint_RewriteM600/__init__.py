@@ -58,6 +58,12 @@ class Rewritem600Plugin(
 
         return cmd
 
+    def test_hook_script(self, comm_instance, script_type,
+                         script_name, *args, **kwargs):
+        self._logger.info("test_hook_script " +
+                          script_type + ":" + script_name)
+        return None, None
+
     def test_hoook(
         self, comm_instance, phase, cmd, parameters, tags=None, *args, **kwargs
     ):
@@ -178,4 +184,5 @@ def __plugin_load__():
         "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information,
         "octoprint.comm.protocol.gcode.queuing": __plugin_implementation__.rewrite_m600,
         "octoprint.comm.protocol.atcommand.queuing": __plugin_implementation__.test_hoook,
+        "octoprint.comm.protocol.scripts":  __plugin_implementation__.test_hoook_script
     }
