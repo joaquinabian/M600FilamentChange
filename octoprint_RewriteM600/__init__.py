@@ -77,8 +77,27 @@ class Rewritem600Plugin(
                 "ROTTEV: pause_position x" +
                 str(comm_instance.pause_position.x) +
                 " Z" + str(comm_instance.pause_position.z))
-            return None
+            cmd = []
+            if self._settings.get_boolean(["DisableSteppers"]):
+                cmd.append("M17")  # resume all steppers
+            # cmd.append("G91")  # relative positioning
+            # cmd.append("G1 Z" + str(self._settings.get(["zDistance"])))
+            cmd.append("G90")  # Absolute Positioning
+            cmd.append("M83")  # relative E
+            cmd.append("G1 X"
+                       + str(self.pause_position.x)
+                       + " Y"
+                       + str(self.pause_position.y)
+                       + " Z"
+                       + str(self.pause_position.z)
+                       + " F4500")
+            cmd.append("M300 S440 P100")  # Beep
+
+            if self.pause_position.f:
+                cmd.append("G1 F" + str(self.pause_position.f))
+            return cmd, None
         if script_type == "gcode" and script_name == "afterPrintPaused" and self.fillamentSwap:
+            self.fillamentSwap = False
             self.pause_position.copy_from(comm_instance.pause_position)
             self._logger.info(
                 "ROTTEV: self.pause_position x" +
