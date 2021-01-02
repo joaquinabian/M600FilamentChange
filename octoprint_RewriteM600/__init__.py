@@ -84,7 +84,7 @@ class Rewritem600Plugin(
                 "ROTTEV: self.pause_position x" +
                 str(self.pause_position.x) + " Z" + str(self.pause_position.z))
             cmd = [
-                ("M117 Filament Change",),  # LCD message
+                "M117 Filament Change",  # LCD message
                 "M300 S440 P100",  # Beep
                 "G91",  # relative positioning
                 "M83",  # relative E
@@ -102,7 +102,8 @@ class Rewritem600Plugin(
                            ("Z "if self._settings.get(["DisableZ"]) else "") +
                            ("E" if self._settings.get(["DisableE"]) else ""))
 
-        return cmd, None
+            return cmd, None
+        return None
 
     def test_hoook(
         self, comm_instance, phase, cmd, parameters, tags=None, *args, **kwargs
