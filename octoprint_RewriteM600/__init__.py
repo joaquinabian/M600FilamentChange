@@ -22,6 +22,7 @@ class Rewritem600Plugin(
 
     def __init__(self):
         self.last_position = PositionRecord()
+        self.pause_position = PositionRecord()
         self.fillamentSwap = False
 
     def on_after_startup(self):
@@ -38,6 +39,7 @@ class Rewritem600Plugin(
             )
             self.last_position.copy_from(comm_instance.last_position)
             comm_instance.setPause(True)
+            self.pause_position.copy_from(comm_instance.pause_position)
             cmd = [
                 ("M117 Filament Change",),  # LCD message
                 "M300 S440 P100",  # Beep
@@ -69,6 +71,9 @@ class Rewritem600Plugin(
         self._logger.info(
             "ROTTEV: last_position x" +
             str(self.last_position.x) + " Z" + str(self.last_position.z))
+        self._logger.info(
+            "ROTTEV: self.pause_position x" +
+            str(self.pause_position.x) + " Z" + str(self.pause_position.z))
         self._logger.info(
             "ROTTEV: pause_position x" +
             str(comm_instance.pause_position.x) +
