@@ -40,19 +40,19 @@ class Rewritem600Plugin(
             self.last_position.copy_from(comm_instance.last_position)
             comm_instance.setPause(True)
 
-            # cmd = [
-            #     ("M117 Filament Change",),  # LCD message
-            #     "M300 S440 P100",  # Beep
-            #     "G91",  # relative positioning
-            #     "M83",  # relative E
-            #     "G1 Z" + str(self._settings.get(["zDistance"])) +
-            #     " E-" + \
-            #     str(self._settings.get(["retractDistance"])) + " F4500",
-            #     "M82",  # absolute E
-            #     "G90",  # absolute position
-            #     "G1 X" + str(self._settings.get(["toolChangeX"])) + " Y" + str(
-            #         self._settings.get(["toolChangeY"]))  # go to filament change location
-            # ]
+            cmd = [
+                ("M117 Filament Change",),  # LCD message
+                "M300 S440 P100",  # Beep
+                #     "G91",  # relative positioning
+                #     "M83",  # relative E
+                #     "G1 Z" + str(self._settings.get(["zDistance"])) +
+                #     " E-" + \
+                #     str(self._settings.get(["retractDistance"])) + " F4500",
+                #     "M82",  # absolute E
+                #     "G90",  # absolute position
+                #     "G1 X" + str(self._settings.get(["toolChangeX"])) + " Y" + str(
+                #         self._settings.get(["toolChangeY"]))  # go to filament change location
+            ]
             # if self._settings.get_boolean(["DisableSteppers"]):
             #     cmd.append("M18 " + ("X" if self._settings.get(["DisableX"]) else "") +
             #                ("Y " if self._settings.get(["DisableY"]) else "") +
@@ -102,9 +102,8 @@ class Rewritem600Plugin(
             self._logger.info(
                 "ROTTEV: self.pause_position x" +
                 str(self.pause_position.x) + " Z" + str(self.pause_position.z))
+            cmd = []
             cmd = [
-                "M117 Filament Change",  # LCD message
-                "M300 S440 P100",  # Beep
                 "G91",  # relative positioning
                 "M83",  # relative E
                 "G1 Z" + str(self._settings.get(["zDistance"])) +
@@ -113,14 +112,14 @@ class Rewritem600Plugin(
                 "M82",  # absolute E
                 "G90",  # absolute position
                 "G1 X" + str(self._settings.get(["toolChangeX"])) + " Y" + str(
-                        self._settings.get(["toolChangeY"]))  # go to filament change location
+                        self._settings.get(["toolChangeY"])) + " F9000"  # go to filament change location
             ]
             if self._settings.get_boolean(["DisableSteppers"]):
-                cmd.append("M18 " + ("X" if self._settings.get(["DisableX"]) else "") +
-                           ("Y " if self._settings.get(["DisableY"]) else "") +
-                           ("Z "if self._settings.get(["DisableZ"]) else "") +
-                           ("E" if self._settings.get(["DisableE"]) else ""))
-
+                cmd.append("M18" + (" X" if self._settings.get(["DisableX"]) else "") +
+                           (" Y" if self._settings.get(["DisableY"]) else "") +
+                           (" Z "if self._settings.get(["DisableZ"]) else "") +
+                           (" E" if self._settings.get(["DisableE"]) else ""))
+            self._logger.info("cmd: ".join(cmd))
             return cmd, None
         return None
 
@@ -136,42 +135,42 @@ class Rewritem600Plugin(
         )
         return
 
-    def after_resume(
-        self, comm_instance, phase, cmd, parameters, tags=None, *args, **kwargs
-    ):
-        self._logger.info("ROTTEV: cmd " + cmd)
-        if cmd and cmd == "resume":
-            self._logger.info("ROTTEV: after_resume and cmd == resume")
-            self._logger.info(
-                "ROTTEV: after_resume last_position x" +
-                str(self.last_position.x) + " Z" + str(self.last_position.z))
-            if comm_instance.pause_position.x:
-                self._logger.info(
-                    "ROTTEV: after_resume x" +
-                    str(comm_instance.pause_position.x) +
-                    " Z" + str(comm_instance.pause_position.z))
-                cmd = []
-                if self._settings.get_boolean(["DisableSteppers"]):
-                    cmd.append("M17")  # resume all steppers
-                # cmd.append("G91")  # relative positioning
-                # cmd.append("G1 Z" + str(self._settings.get(["zDistance"])))
-                cmd.append("G90")  # Absolute Positioning
-                cmd.append("M83")  # relative E
-                cmd.append("G1 X"
-                           + str(comm_instance.pause_position.x)
-                           + " Y"
-                           + str(comm_instance.pause_position.y)
-                           + " Z"
-                           + str(comm_instance.pause_position.z)
-                           + " F4500")
-                cmd.append("M300 S440 P100")  # Beep
+    # def after_resume(
+    #     self, comm_instance, phase, cmd, parameters, tags=None, *args, **kwargs
+    # ):
+    #     self._logger.info("ROTTEV: cmd " + cmd)
+    #     if cmd and cmd == "resume":
+    #         self._logger.info("ROTTEV: after_resume and cmd == resume")
+    #         self._logger.info(
+    #             "ROTTEV: after_resume last_position x" +
+    #             str(self.last_position.x) + " Z" + str(self.last_position.z))
+    #         if comm_instance.pause_position.x:
+    #             self._logger.info(
+    #                 "ROTTEV: after_resume x" +
+    #                 str(comm_instance.pause_position.x) +
+    #                 " Z" + str(comm_instance.pause_position.z))
+    #             cmd = []
+    #             if self._settings.get_boolean(["DisableSteppers"]):
+    #                 cmd.append("M17")  # resume all steppers
+    #             # cmd.append("G91")  # relative positioning
+    #             # cmd.append("G1 Z" + str(self._settings.get(["zDistance"])))
+    #             cmd.append("G90")  # Absolute Positioning
+    #             cmd.append("M83")  # relative E
+    #             cmd.append("G1 X"
+    #                        + str(comm_instance.pause_position.x)
+    #                        + " Y"
+    #                        + str(comm_instance.pause_position.y)
+    #                        + " Z"
+    #                        + str(comm_instance.pause_position.z)
+    #                        + " F4500")
+    #             cmd.append("M300 S440 P100")  # Beep
 
-                if comm_instance.pause_position.f:
-                    cmd.append("G1 F" + str(comm_instance.pause_position.f))
-                comm_instance.commands(cmd)
+    #             if comm_instance.pause_position.f:
+    #                 cmd.append("G1 F" + str(comm_instance.pause_position.f))
+    #             comm_instance.commands(cmd)
 
-            comm_instance.setPause(False)
-        return
+    #         comm_instance.setPause(False)
+    #     return
 
     def get_settings_defaults(self):
         return dict(zDistance=50,
@@ -243,6 +242,6 @@ def __plugin_load__():
     __plugin_hooks__ = {
         "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information,
         "octoprint.comm.protocol.gcode.queuing": __plugin_implementation__.rewrite_m600,
-        "octoprint.comm.protocol.atcommand.queuing": __plugin_implementation__.test_hoook,
+        # "octoprint.comm.protocol.atcommand.queuing": __plugin_implementation__.test_hoook,
         "octoprint.comm.protocol.scripts":  __plugin_implementation__.test_hoook_script,
     }
