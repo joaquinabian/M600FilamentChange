@@ -39,7 +39,50 @@ class Rewritem600Plugin(
             )
             self.last_position.copy_from(comm_instance.last_position)
             comm_instance.setPause(True)
+
+            # cmd = [
+            #     ("M117 Filament Change",),  # LCD message
+            #     "M300 S440 P100",  # Beep
+            #     "G91",  # relative positioning
+            #     "M83",  # relative E
+            #     "G1 Z" + str(self._settings.get(["zDistance"])) +
+            #     " E-" + \
+            #     str(self._settings.get(["retractDistance"])) + " F4500",
+            #     "M82",  # absolute E
+            #     "G90",  # absolute position
+            #     "G1 X" + str(self._settings.get(["toolChangeX"])) + " Y" + str(
+            #         self._settings.get(["toolChangeY"]))  # go to filament change location
+            # ]
+            # if self._settings.get_boolean(["DisableSteppers"]):
+            #     cmd.append("M18 " + ("X" if self._settings.get(["DisableX"]) else "") +
+            #                ("Y " if self._settings.get(["DisableY"]) else "") +
+            #                ("Z "if self._settings.get(["DisableZ"]) else "") +
+            #                ("E" if self._settings.get(["DisableE"]) else ""))
+            self.fillamentSwap = True
+
+        return cmd
+
+    def test_hoook_script(self, comm_instance, script_type,
+                          script_name, *args, **kwargs):
+        self._logger.info("test_hook_script " +
+                          script_type + ":" + script_name)
+        if script_type == "gcode" and script_name == "beforePrintResumed":
+            self._logger.info(
+                "ROTTEV: last_position x" +
+                str(self.last_position.x) + " Z" + str(self.last_position.z))
+            self._logger.info(
+                "ROTTEV: self.pause_position x" +
+                str(self.pause_position.x) + " Z" + str(self.pause_position.z))
+            self._logger.info(
+                "ROTTEV: pause_position x" +
+                str(comm_instance.pause_position.x) +
+                " Z" + str(comm_instance.pause_position.z))
+            return None
+        if script_type == "gcode" and script_name == "afterPrintPaused" and self.fillamentSwap:
             self.pause_position.copy_from(comm_instance.pause_position)
+            self._logger.info(
+                "ROTTEV: self.pause_position x" +
+                str(self.pause_position.x) + " Z" + str(self.pause_position.z))
             cmd = [
                 ("M117 Filament Change",),  # LCD message
                 "M300 S440 P100",  # Beep
@@ -51,35 +94,15 @@ class Rewritem600Plugin(
                 "M82",  # absolute E
                 "G90",  # absolute position
                 "G1 X" + str(self._settings.get(["toolChangeX"])) + " Y" + str(
-                    self._settings.get(["toolChangeY"]))  # go to filament change location
+                        self._settings.get(["toolChangeY"]))  # go to filament change location
             ]
             if self._settings.get_boolean(["DisableSteppers"]):
                 cmd.append("M18 " + ("X" if self._settings.get(["DisableX"]) else "") +
                            ("Y " if self._settings.get(["DisableY"]) else "") +
                            ("Z "if self._settings.get(["DisableZ"]) else "") +
                            ("E" if self._settings.get(["DisableE"]) else ""))
-            self.fillamentSwap = True
 
-        return cmd
-
-    def test_hoook_script(self, comm_instance, script_type,
-                          script_name, *args, **kwargs):
-        self._logger.info("test_hook_script " +
-                          script_type + ":" + script_name)
-        if not script_type == "gcode" or not script_name == "beforePrintResumed":
-            return None
-        self._logger.info(
-            "ROTTEV: last_position x" +
-            str(self.last_position.x) + " Z" + str(self.last_position.z))
-        self._logger.info(
-            "ROTTEV: self.pause_position x" +
-            str(self.pause_position.x) + " Z" + str(self.pause_position.z))
-        self._logger.info(
-            "ROTTEV: pause_position x" +
-            str(comm_instance.pause_position.x) +
-            " Z" + str(comm_instance.pause_position.z))
-
-        return None, None
+        return cmd, None
 
     def test_hoook(
         self, comm_instance, phase, cmd, parameters, tags=None, *args, **kwargs
