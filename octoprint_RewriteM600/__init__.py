@@ -1,197 +1,105 @@
 # coding=utf-8
 from __future__ import absolute_import
 
-# (Don't forget to remove me)
-# This is a basic skeleton for your plugin's __init__.py. You probably want to adjust the class name of your plugin
-# as well as the plugin mixins it's subclassing from. This is really just a basic skeleton to get you started,
-# defining your plugin as a template plugin, settings and asset plugin. Feel free to add or remove mixins
-# as necessary.
-#
-# Take a look at the documentation on what other plugin mixins are available.
-
-import octoprint.plugin
+from octoprint.plugin import StartupPlugin, AssetPlugin
+from octoprint.plugin import TemplatePlugin, SettingsPlugin
 from octoprint.util.comm import PositionRecord
 
 
-class Rewritem600Plugin(
-    octoprint.plugin.StartupPlugin,
-    octoprint.plugin.AssetPlugin,
-    octoprint.plugin.TemplatePlugin,
-    octoprint.plugin.SettingsPlugin,
-):
-
+class Rewritem600Plugin(StartupPlugin, AssetPlugin, TemplatePlugin, SettingsPlugin):
     def __init__(self):
-        self.last_position = PositionRecord()
         self.pause_position = PositionRecord()
-        self.fillamentSwap = False
+        self.changing_filament = False
 
     def on_after_startup(self):
         self._logger.info("Hello World!")
 
     def rewrite_m600(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
         if gcode and gcode == "M600":
-            self._logger.info("rewrite_m600 gcode: " + gcode)
-            self._plugin_manager.send_plugin_message(
-                self._identifier,
-                dict(
-                    type="popup", msg="Please change the filament and resume the print"
-                ),
-            )
-            self.last_position.copy_from(comm_instance.last_position)
-            comm_instance.setPause(True)
+            self._logger.info("M600 received")
+            dwargs = dict(type="popup", msg="Change filament and resume")
+            self._plugin_manager.send_plugin_message(self._identifier, dwargs)
 
-            cmd = [
-                ("M117 Filament Change",),  # LCD message
-                "M300 S440 P100",  # Beep
-                #     "G91",  # relative positioning
-                #     "M83",  # relative E
-                #     "G1 Z" + str(self._settings.get(["zDistance"])) +
-                #     " E-" + \
-                #     str(self._settings.get(["retractDistance"])) + " F4500",
-                #     "M82",  # absolute E
-                #     "G90",  # absolute position
-                #     "G1 X" + str(self._settings.get(["toolChangeX"])) + " Y" + str(
-                #         self._settings.get(["toolChangeY"]))  # go to filament change location
-            ]
-            # if self._settings.get_boolean(["DisableSteppers"]):
-            #     cmd.append("M18 " + ("X" if self._settings.get(["DisableX"]) else "") +
-            #                ("Y " if self._settings.get(["DisableY"]) else "") +
-            #                ("Z "if self._settings.get(["DisableZ"]) else "") +
-            #                ("E" if self._settings.get(["DisableE"]) else ""))
-            self.fillamentSwap = True
+            comm_instance.setPause(True)
+            self.changing_filament = True
+
+            cmd = [("M117 Filament Change",)]       # LCD message
 
         return cmd
 
-    def test_hoook_script(self, comm_instance, script_type,
-                          script_name, *args, **kwargs):
-        self._logger.info("test_hook_script " +
-                          script_type + ":" + script_name)
-        if script_type == "gcode" and script_name == "beforePrintResumed" and self.fillamentSwap:
-            self.fillamentSwap = False
-            self._logger.info(
-                "ROTTEV: last_position x" +
-                str(self.last_position.x) + " Z" + str(self.last_position.z))
-            self._logger.info(
-                "ROTTEV: self.pause_position x" +
-                str(self.pause_position.x) + " Z" + str(self.pause_position.z))
-            self._logger.info(
-                "ROTTEV: pause_position x" +
-                str(comm_instance.pause_position.x) +
-                " Z" + str(comm_instance.pause_position.z))
-            postix = None
-            prefix = []
-            if self._settings.get_boolean(["DisableSteppers"]):
-                prefix.append("M17")  # resume all steppers
-            # cmd.append("G91")  # relative positioning
-            # cmd.append("G1 Z" + str(self._settings.get(["zDistance"])))
-            prefix.append("G90")  # Absolute Positioning
-            prefix.append("M83")  # relative E
-            prefix.append("G1 X"
-                          + str(self.pause_position.x)
-                          + " Y"
-                          + str(self.pause_position.y)
-                          + " Z"
-                          + str(self.pause_position.z)
-                          + " F4500")
-            prefix.append("M300 S440 P100")  # Beep
-
-            if self.pause_position.f:
-                prefix.append("G1 F" + str(self.pause_position.f))
-            return prefix, postix
-        if script_type == "gcode" and script_name == "afterPrintPaused" and self.fillamentSwap:
-
+    def m600_hook(self, comm_instance, script_type, script_name, *args, **kwargs):
+        self._logger.info("m600_hook %s: %s" % (script_type, script_name))
+        #
+        if script_type == "gcode" and script_name == "afterPrintPaused" and self.changing_filament:
             self.pause_position.copy_from(comm_instance.pause_position)
+            get_bool = self._settings.get_boolean
+            get = self._settings.get
+
             self._logger.info(
-                "ROTTEV: self.pause_position x" +
-                str(self.pause_position.x) + " Z" + str(self.pause_position.z))
+                "AfterPause: pause_position X%f Z%f" % (self.pause_position.x,
+                                                        self.pause_position.z)
+            )
             postix = None
-            prefix = []
-            prefix = [
-                "G91",  # relative positioning
-                "M83",  # relative E
-                "G1 Z" +
-                str(self._settings.get(["zDistance"])) +
-                " E-" +
-                str(self._settings.get(["retractDistance"])) +
-                " F4500",
-                "M82",  # absolute E
-                "G90",  # absolute position
-                "G1 X" + str(self._settings.get(["toolChangeX"])) + " Y" + str(
-                        self._settings.get(["toolChangeY"])) + " F9000"  # go to filament change location
-            ]
-            if self._settings.get_boolean(["DisableSteppers"]):
-                prefix.append("M84" + (" X" if self._settings.get(["DisableX"]) else "") +
-                              (" Y" if self._settings.get(["DisableY"]) else "") +
-                              (" Z "if self._settings.get(["DisableZ"]) else "") +
-                              (" E" if self._settings.get(["DisableE"]) else ""))
-            if self._settings.get_boolean(["PostixEnableSteppers"]) and self._settings.get_boolean(["DisableSteppers"]):
-                postix = []
-                postix.append("M17" + (" X" if not self._settings.get(["DisableX"]) else "") +
-                              (" Y" if not self._settings.get(["DisableY"]) else "") +
-                              (" Z "if not self._settings.get(["DisableZ"]) else "") +
-                              (" E" if not self._settings.get(["DisableE"]) else ""))
+            prefix = ["G91",           # relative XYZE
+                      "M83",           # relative E
+                      "G1 Z%s E-5 F3000" % get(["zDistance"]),
+                      "M82",           # absolute E
+                      "G90",           # absolute XYZE
+                      "G0 X%s Y%s F3000" % (get(["toolChangeX"]),  # go to filament change location
+                                            get(["toolChangeY"])
+                                            ),
+                      "G91",           # relative XYZE
+                      "M83",           # relative E
+                      "G1 E-%s F200" % get(["retractDistance"]),
+                      "M82",           # absolute E
+                      "G90"            # absolute XYZE
+                      ]
+            if get_bool(["DisableSteppers"]):
+                prefix.append("M84" +
+                              " X" if get(["DisableX"]) else "" +
+                              " Y" if get(["DisableY"]) else "" +
+                              " Z" if get(["DisableZ"]) else "" +
+                              " E" if get(["DisableE"]) else ""
+                              )
+
+            if get_bool(["PostixEnableSteppers"]) and get_bool(["DisableSteppers"]):
+                postix = ["M17",
+                          " X" if not get(["DisableX"]) else "",
+                          " Y" if not get(["DisableY"]) else "",
+                          " Z" if not get(["DisableZ"]) else "",
+                          " E" if not get(["DisableE"]) else ""
+                          ]
 
             self._logger.info("prefix: " + ", ".join(prefix))
             if postix:
                 self._logger.info("postix: " + ", ".join(postix))
-            # comm_instance.commands(prefix)
+
             return prefix, postix
-        return None
-
-    def test_hoook(
-        self, comm_instance, phase, cmd, parameters, tags=None, *args, **kwargs
-    ):
-        self._logger.info("test_hoook")
-        self._plugin_manager.send_plugin_message(
-            self._identifier,
-            dict(
-                type="popup", msg="test_hoook: " + cmd
-            ),
-        )
-        return
-
-    # def after_resume(
-    #     self, comm_instance, phase, cmd, parameters, tags=None, *args, **kwargs
-    # ):
-    #     self._logger.info("ROTTEV: cmd " + cmd)
-    #     if cmd and cmd == "resume":
-    #         self._logger.info("ROTTEV: after_resume and cmd == resume")
-    #         self._logger.info(
-    #             "ROTTEV: after_resume last_position x" +
-    #             str(self.last_position.x) + " Z" + str(self.last_position.z))
-    #         if comm_instance.pause_position.x:
-    #             self._logger.info(
-    #                 "ROTTEV: after_resume x" +
-    #                 str(comm_instance.pause_position.x) +
-    #                 " Z" + str(comm_instance.pause_position.z))
-    #             cmd = []
-    #             if self._settings.get_boolean(["DisableSteppers"]):
-    #                 cmd.append("M17")  # resume all steppers
-    #             # cmd.append("G91")  # relative positioning
-    #             # cmd.append("G1 Z" + str(self._settings.get(["zDistance"])))
-    #             cmd.append("G90")  # Absolute Positioning
-    #             cmd.append("M83")  # relative E
-    #             cmd.append("G1 X"
-    #                        + str(comm_instance.pause_position.x)
-    #                        + " Y"
-    #                        + str(comm_instance.pause_position.y)
-    #                        + " Z"
-    #                        + str(comm_instance.pause_position.z)
-    #                        + " F4500")
-    #             cmd.append("M300 S440 P100")  # Beep
-
-    #             if comm_instance.pause_position.f:
-    #                 cmd.append("G1 F" + str(comm_instance.pause_position.f))
-    #             comm_instance.commands(cmd)
-
-    #         comm_instance.setPause(False)
-    #     return
+        #
+        if script_type == "gcode" and script_name == "beforePrintResumed" and self.changing_filament:
+            self.changing_filament = False
+            pause_position = (self.pause_position.x, self.pause_position.y,
+                              self.pause_position.z, self.pause_position.e)
+            self._logger.info(
+                "BeforeResume: pause_position X%f Y%f Z%f E%f" % pause_position)
+            postix = None
+            prefix = []
+            if self._settings.get_boolean(["DisableSteppers"]):
+                prefix.append("M17")      # resume all steppers
+        
+            prefix.append("G90")          # Absolute Positioning
+            prefix.append("M82")          # Absolute E
+            prefix.append("G92 E%f" % pause_position[3])  # Set E
+            prefix.append("G0 X%f Y%f Z%f F4500" % pause_position[0:3])
+            if self.pause_position.f:
+                prefix.append("G0 F%f" % self.pause_position.f)
+            return prefix, postix
 
     def get_settings_defaults(self):
-        return dict(zDistance=50,
-                    toolChangeX=0,
-                    toolChangeY=0,
-                    retractDistance=5,
+        return dict(zDistance=10,
+                    toolChangeX=-10,
+                    toolChangeY=-10,
+                    retractDistance=55,
                     DisableSteppers=False,
                     DisableX=False,
                     DisableY=False,
@@ -200,54 +108,35 @@ class Rewritem600Plugin(
                     PostixEnableSteppers=False)
 
     def get_template_configs(self):
-        return [
-            dict(type="navbar", custom_bindings=False),
-            dict(type="settings", custom_bindings=False),
-        ]
-
-    # ~~ AssetPlugin mixin
+        return [dict(type="navbar", custom_bindings=False),
+                dict(type="settings", custom_bindings=False)]
 
     def get_assets(self):
-        # Define your plugin's asset files to automatically include in the
-        # core UI here.
-        return dict(
-            js=["js/RewriteM600.js"],
-            css=["css/RewriteM600.css"],
-            less=["less/RewriteM600.less"],
-        )
-
-    # ~~ Softwareupdate hook
+        """AssetPlugin mixin"""
+        return dict(js=["js/RewriteM600.js"],
+                    css=["css/RewriteM600.css"],
+                    less=["less/RewriteM600.less"])
 
     def get_update_information(self):
-        # Define the configuration for your plugin to use with the Software Update
-        # Plugin here. See https://docs.octoprint.org/en/master/bundledplugins/softwareupdate.html
-        # for details.
-        return dict(
-            RewriteM600=dict(
-                displayName="Rewritem600 Plugin",
-                displayVersion=self._plugin_version,
-                # version check: github repository
-                type="github_release",
-                user="jepler",
-                repo="RewriteM600",
-                current=self._plugin_version,
-                # update method: pip
-                pip="https://github.com/jepler/RewriteM600/archive/{target_version}.zip",
-            )
-        )
+        """ Software Update hook.
+        
+        Define the configuration for your plugin to use with the Software Update 
+        """
+        m600_dict = dict(displayName="Rewritem600 Plugin Quim",
+                         displayVersion=self._plugin_version,
+                         # version check: github repository
+                         type="github_release",
+                         user="joaquinabian",
+                         repo="RewriteM600",
+                         current=self._plugin_version,
+                         # update method: pip
+                         pip="https://github.com/jepler/RewriteM600/archive/{target_version}.zip")
+        
+        return dict(RewriteM600=m600_dict)
 
 
-# If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
-# ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
-# can be overwritten via __plugin_xyz__ control properties. See the documentation for that.
-__plugin_name__ = "Filament Change - M600 Rewriter"
-
-# Starting with OctoPrint 1.4.0 OctoPrint will also support to run under Python 3 in addition to the deprecated
-# Python 2. New plugins should make sure to run under both versions for now. Uncomment one of the following
-# compatibility flags according to what Python versions your plugin supports!
-# __plugin_pythoncompat__ = ">=2.7,<3" # only python 2
-# __plugin_pythoncompat__ = ">=3,<4" # only python 3
-__plugin_pythoncompat__ = ">=2.7,<4"  # python 2 and 3
+__plugin_name__ = "Filament Change - M600 Rewriter Quim"
+__plugin_pythoncompat__ = ">=2.7,<4"
 
 
 def __plugin_load__():
@@ -258,6 +147,5 @@ def __plugin_load__():
     __plugin_hooks__ = {
         "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information,
         "octoprint.comm.protocol.gcode.queuing": __plugin_implementation__.rewrite_m600,
-        # "octoprint.comm.protocol.atcommand.queuing": __plugin_implementation__.test_hoook,
-        "octoprint.comm.protocol.scripts":  __plugin_implementation__.test_hoook_script,
+        "octoprint.comm.protocol.scripts":  __plugin_implementation__.m600_hook,
     }
