@@ -1,25 +1,31 @@
 # RewriteM600
 
-Implement M600 for pinters that can't support M600 by default (TFT with out Marlin Mode support, like Artilelry X1 and Genius). You can use M600, is going to stop wait until you change and press resume. If you have a TFT 28 (Like the Artillery) i would recomend you to check [Rawr TFT Firmware](https://github.com/wgcv/RAWR-TFT-Firmware-Artillery3D) to implement M600 direct in the TFT and do not need Octoprint.
+Implement M600 for printers that can't support M600 by default.
+M600 will stop the print and wait until you change and press resume.
+
+This is a fork from a fork from the original [Octoprint plugin](https://plugins.octoprint.org/plugins/RewriteM600/) by Gustavo Cevallos.
+The original code is not actually working and seems abandoned.
+A fork from [rottev](https://github.com/rottev/RewriteM600) solved some original problems, and this repository is forked from there.
+
+The code is being cleaned and pythonized.  
+Currently, it does what I wanted from it in a Snapmaker:
+- The print goes normal until it finds a M600 inserted with Cura (or manually).
+- Retract few millimeters and moves z 10 mm to separate from the object.
+- Inmediately moves to a parking position and retracts 55 mm of filament
+  (In the snapmaker this is enough for extracting the filament from the printing head).
+- Now you can put another filament, extrude using the Octoprint control to remove any residue from the old filament, and press continue in Octoprint.
+- The head moves to the last position and continues printing
+
 
 ## Setup
 
-Install via the bundled [Plugin Manager](https://docs.octoprint.org/en/master/bundledplugins/pluginmanager.html).
-
-OctoPrint Settings (Wrench) -> Plugin Mananger -> Get More -> Page the url in From URL and press Install. 
-
-After install restart the instance.
-
-Copy or manually using this URL:
-
-    https://github.com/wgcv/RewriteM600/archive/master.zip
-
-
-
+For the moment the way I am considering is to replace the files from a canonical installation in Octoprint.
 
 ## Screenshots
+
 ![Screenshot](https://github.com/wgcv/plugins.octoprint.org/raw/gh-pages/assets/img/plugins/RewriteM600/M600-in-action.png
 )
 
 ## Support
-You can help this project reporting issues, making PR or Sponsor it [PayPal](https://paypal.me/wgcv).
+
+You can help this project by reporting issues, making PR.
