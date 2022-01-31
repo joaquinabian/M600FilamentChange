@@ -62,7 +62,7 @@ class Rewritem600Plugin(StartupPlugin, AssetPlugin, TemplatePlugin, SettingsPlug
                               " E" if get(["DisableE"]) else ""
                               )
 
-            if get_bool(["PostixEnableSteppers"]) and get_bool(["DisableSteppers"]):
+            if get_bool(["PostfixEnableSteppers"]) and get_bool(["DisableSteppers"]):
                 postfix = ["M17",
                           " X" if not get(["DisableX"]) else "",
                           " Y" if not get(["DisableY"]) else "",
