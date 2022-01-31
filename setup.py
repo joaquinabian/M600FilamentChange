@@ -1,9 +1,8 @@
 # coding=utf-8
 
-########################################################################################################################
+from setuptools import setup
 
 # The plugin's identifier, has to be unique
-from setuptools import setup
 plugin_identifier = "RewriteM600"
 
 # The plugin's python package, should be "octoprint_<plugin identifier>", has to be unique
