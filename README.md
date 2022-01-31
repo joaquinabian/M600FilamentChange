@@ -1,5 +1,4 @@
 # RewriteM600
-
 Implement M600 for printers that can't support M600 by default.
 M600 will stop the print and wait until you change and press resume.
 
@@ -18,14 +17,9 @@ Currently, it does what I wanted from it in a Snapmaker:
 
 
 ## Setup
-
 For the moment the way I am considering is to replace the files from a canonical installation in Octoprint.
 
 ## Screenshots
-
-![Screenshot](https://github.com/wgcv/plugins.octoprint.org/raw/gh-pages/assets/img/plugins/RewriteM600/M600-in-action.png
-)
-
+![Screenshot](https://github.com/joaquinabian/RewriteM600/extras/pics/tower_layer_change_8x8_2.png)
 ## Support
-
 You can help this project by reporting issues, making PR.
