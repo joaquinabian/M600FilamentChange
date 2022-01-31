@@ -3,8 +3,8 @@ layout: plugin
 
 id: RewriteM600
 title: RewriteM600
-description: Implement M600 for pinters that can't support M600 by default (TFT with out marlin mode support, like Artilelry X1 and Genius)
-author: Gustavo Cevallos
+description: Implement M600 for printers that can't support M600 by default (TFT with out marlin mode support, like Artilelry X1 and Genius)
+author: Gustavo Cevallos / ROTTEV / Joaquin Abian
 license: MIT
 
 # TODO
@@ -17,7 +17,8 @@ archive: https://github.com/wgcv/RewriteM600/archive/master.zip
 # TODO
 # Set this to true if your plugin uses the dependency_links setup parameter to include
 # library versions not yet published on PyPi. SHOULD ONLY BE USED IF THERE IS NO OTHER OPTION!
-#follow_dependency_links: false
+#
+follow_dependency_links: false
 
 # TODO
 tags:
