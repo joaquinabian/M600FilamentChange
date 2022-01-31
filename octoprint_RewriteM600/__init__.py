@@ -39,7 +39,7 @@ class Rewritem600Plugin(StartupPlugin, AssetPlugin, TemplatePlugin, SettingsPlug
                 "AfterPause: pause_position X%f Z%f" % (self.pause_position.x,
                                                         self.pause_position.z)
             )
-            postix = None
+            postfix = None
             prefix = ["G91",           # relative XYZE
                       "M83",           # relative E
                       "G1 Z%s E-5 F3000" % get(["zDistance"]),
@@ -63,7 +63,7 @@ class Rewritem600Plugin(StartupPlugin, AssetPlugin, TemplatePlugin, SettingsPlug
                               )
 
             if get_bool(["PostixEnableSteppers"]) and get_bool(["DisableSteppers"]):
-                postix = ["M17",
+                postfix = ["M17",
                           " X" if not get(["DisableX"]) else "",
                           " Y" if not get(["DisableY"]) else "",
                           " Z" if not get(["DisableZ"]) else "",
@@ -71,10 +71,10 @@ class Rewritem600Plugin(StartupPlugin, AssetPlugin, TemplatePlugin, SettingsPlug
                           ]
 
             self._logger.info("prefix: " + ", ".join(prefix))
-            if postix:
-                self._logger.info("postix: " + ", ".join(postix))
+            if postfix:
+                self._logger.info("postfix: " + ", ".join(postfix))
 
-            return prefix, postix
+            return prefix, postfix
         #
         if script_type == "gcode" and script_name == "beforePrintResumed" and self.changing_filament:
             self.changing_filament = False
@@ -82,7 +82,7 @@ class Rewritem600Plugin(StartupPlugin, AssetPlugin, TemplatePlugin, SettingsPlug
                               self.pause_position.z, self.pause_position.e)
             self._logger.info(
                 "BeforeResume: pause_position X%f Y%f Z%f E%f" % pause_position)
-            postix = None
+            postfix = None
             prefix = []
             if self._settings.get_boolean(["DisableSteppers"]):
                 prefix.append("M17")      # resume all steppers
@@ -93,7 +93,7 @@ class Rewritem600Plugin(StartupPlugin, AssetPlugin, TemplatePlugin, SettingsPlug
             prefix.append("G0 X%f Y%f Z%f F4500" % pause_position[0:3])
             if self.pause_position.f:
                 prefix.append("G0 F%f" % self.pause_position.f)
-            return prefix, postix
+            return prefix, postfix
 
     def get_settings_defaults(self):
         return dict(zDistance=10,
