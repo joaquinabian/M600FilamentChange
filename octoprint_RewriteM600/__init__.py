@@ -45,8 +45,8 @@ class Rewritem600Plugin(StartupPlugin, AssetPlugin, TemplatePlugin, SettingsPlug
                       "G1 Z%s E-5 F3000" % get(["zDistance"]),
                       "M82",           # absolute E
                       "G90",           # absolute XYZE
-                      "G0 X%s Y%s F3000" % (get(["toolChangeX"]),  # go to filament change location
-                                            get(["toolChangeY"])
+                      "G0 X%s Y%s F3000" % (get(["x_park"]),  # go to filament change location
+                                            get(["y_park"])
                                             ),
                       "G91",           # relative XYZE
                       "M83",           # relative E
@@ -130,7 +130,7 @@ class Rewritem600Plugin(StartupPlugin, AssetPlugin, TemplatePlugin, SettingsPlug
                          repo="RewriteM600",
                          current=self._plugin_version,
                          # update method: pip
-                         pip="https://github.com/jepler/RewriteM600/archive/{target_version}.zip")
+                         pip="https://github.com/joaquinabian/RewriteM600/archive/{target_version}.zip")
         
         return dict(RewriteM600=m600_dict)
 

@@ -2,21 +2,20 @@
     <div class="control-group">
         <label class="control-label">{{ _('Z-Distance(mm): ') }}</label>
         <div class="controls">
-            <input type="number" class="input-block-level" data-bind="value: settings.plugins.RewriteM600.zDistance">
-        </div>
-        <label class="control-label">{{ _('Filament extraction (mm): ') }}</label>
-        <div class="controls">
-            <input type="number" class="input-block-level" data-bind="value: settings.plugins.RewriteM600.retractDistance">
+            <input type="number" class="input-block-level" data-bind="value: settings.plugins.RewriteM600.zDistance"> The nozzle will vertically separate from the object that distance while retracting 5 mm of filament when the chosen layer is reached.
         </div>
         <label class="control-label">{{ _('Park head X (mm): ') }}</label>
         <div class="controls">
-            <input type="number" class="input-block-level" data-bind="value: settings.plugins.RewriteM600.toolChangeX">
+            <input type="number" class="input-block-level" data-bind="value: settings.plugins.RewriteM600.x_park"> Head move here for manual operation
         </div>
         <label class="control-label">{{ _('Park head Y (mm): ') }}</label>
         <div class="controls">
-            <input type="number" class="input-block-level" data-bind="value: settings.plugins.RewriteM600.toolChangeY">
+            <input type="number" class="input-block-level" data-bind="value: settings.plugins.RewriteM600.y_park"> Head move here for manual operation
         </div>
-
+        <label class="control-label">{{ _('Filament extraction (mm): ') }}</label> Amount of filament retracted after parking
+        <div class="controls">
+            <input type="number" class="input-block-level" data-bind="value: settings.plugins.RewriteM600.retractDistance">
+        </div>
     </div>
      
     <div class="control-group">
