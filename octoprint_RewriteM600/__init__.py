@@ -1,5 +1,4 @@
 # coding=utf-8
-from __future__ import absolute_import
 
 from octoprint.plugin import StartupPlugin, AssetPlugin
 from octoprint.plugin import TemplatePlugin, SettingsPlugin
@@ -136,7 +135,8 @@ class Rewritem600Plugin(StartupPlugin, AssetPlugin, TemplatePlugin, SettingsPlug
 
 
 __plugin_name__ = "Filament Change - M600 Rewriter Quim"
-__plugin_pythoncompat__ = ">=2.7,<4"
+__pluging_version__ = "2.0.0"
+__plugin_pythoncompat__ = ">=3.1,<4"
 
 
 def __plugin_load__():
