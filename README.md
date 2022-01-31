@@ -20,6 +20,6 @@ Currently, it does what I wanted from it in a Snapmaker:
 For the moment the way I am considering is to replace the files from a canonical installation in Octoprint.
 
 ## Screenshots
-![Screenshot](https://github.com/joaquinabian/RewriteM600/extras/pics/tower_layer_change_8x8_2.png)
+![A small test tower](./extras/pics/tower_layer_change_8x8_2.png)
 ## Support
 You can help this project by reporting issues, making PR.
