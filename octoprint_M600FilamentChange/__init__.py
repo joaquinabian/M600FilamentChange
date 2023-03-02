@@ -5,15 +5,15 @@ from octoprint.plugin import TemplatePlugin, SettingsPlugin
 from octoprint.util.comm import PositionRecord
 
 
-class Rewritem600Plugin(StartupPlugin, AssetPlugin, TemplatePlugin, SettingsPlugin):
+class M600FilamentChangePlugin(StartupPlugin, AssetPlugin, TemplatePlugin, SettingsPlugin):
     def __init__(self):
         self.pause_position = PositionRecord()
         self.changing_filament = False
 
     def on_after_startup(self):
-        self._logger.info("Hello World!")
+        self._logger.info("Hello from M600FilamentChange!")
 
-    def rewrite_m600(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
+    def m600_catch(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
         if gcode and gcode == "M600":
             self._logger.info("M600 received")
             dwargs = dict(type="popup", msg="Change filament and resume")
@@ -112,40 +112,38 @@ class Rewritem600Plugin(StartupPlugin, AssetPlugin, TemplatePlugin, SettingsPlug
 
     def get_assets(self):
         """AssetPlugin mixin"""
-        return dict(js=["js/RewriteM600.js"],
-                    css=["css/RewriteM600.css"],
-                    less=["less/RewriteM600.less"])
+        return dict(js=["js/M600FilamentChange.js"])
 
     def get_update_information(self):
         """ Software Update hook.
         
         Define the configuration for your plugin to use with the Software Update 
         """
-        m600_dict = dict(displayName="Rewritem600 Plugin Quim",
+        m600_dict = dict(displayName="M600 Filament Change Plugin Quim",
                          displayVersion=self._plugin_version,
                          # version check: github repository
                          type="github_release",
                          user="joaquinabian",
-                         repo="RewriteM600",
+                         repo="M600FilamentChange",
                          current=self._plugin_version,
                          # update method: pip
-                         pip="https://github.com/joaquinabian/RewriteM600/archive/{target_version}.zip")
+                         pip="https://github.com/joaquinabian/M600FilamentChange/archive/{target_version}.zip")
         
-        return dict(RewriteM600=m600_dict)
+        return dict(M600FilamentChange=m600_dict)
 
 
-__plugin_name__ = "Filament Change - M600 Rewriter Quim"
+__plugin_name__ = "M600 Filament Change - Quim"
 __pluging_version__ = "2.0.0"
-__plugin_pythoncompat__ = ">=3.1,<4"
+__plugin_pythoncompat__ = ">=3.7,<4"
 
 
 def __plugin_load__():
     global __plugin_implementation__
-    __plugin_implementation__ = Rewritem600Plugin()
+    __plugin_implementation__ = M600FilamentChangePlugin()
 
     global __plugin_hooks__
     __plugin_hooks__ = {
         "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information,
-        "octoprint.comm.protocol.gcode.queuing": __plugin_implementation__.rewrite_m600,
+        "octoprint.comm.protocol.gcode.queuing": __plugin_implementation__.m600_catch,
         "octoprint.comm.protocol.scripts":  __plugin_implementation__.m600_hook,
     }

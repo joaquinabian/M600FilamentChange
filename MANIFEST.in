@@ -1,4 +1,4 @@
 include README.md
-recursive-include octoprint_RewriteM600/templates *
-recursive-include octoprint_RewriteM600/translations *
-recursive-include octoprint_RewriteM600/static *
+recursive-include octoprint_M600FilamentChange/templates *
+recursive-include octoprint_M600FilamentChange/translations *
+recursive-include octoprint_M600FilamentChange/static *

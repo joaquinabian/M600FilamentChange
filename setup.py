@@ -3,14 +3,14 @@
 from setuptools import setup
 
 # The plugin's identifier, has to be unique
-plugin_identifier = "RewriteM600"
+plugin_identifier = "M600FilamentChange"
 
 # The plugin's python package, should be "octoprint_<plugin identifier>", has to be unique
-plugin_package = "octoprint_RewriteM600"
+plugin_package = "octoprint_M600FilamentChange"
 
 # The plugin's human readable name.
 # Can be overwritten within OctoPrint's internal data via __plugin_name__ in the plugin module
-plugin_name = "RewriteM600-FilamentChangeAtLayer"
+plugin_name = "M600FilamentChange"
 
 # The plugin's version.
 # Can be overwritten within OctoPrint's internal data via __plugin_version__ in the plugin module
@@ -18,7 +18,7 @@ plugin_version = "2.0.0"
 
 # The plugin's description.
 # Can be overwritten within OctoPrint's internal data via __plugin_description__ in the plugin module
-plugin_description = """Implement M600 for printers that do not support M600 (like Snapmaker when M600 is sent from Octoprint)"""
+plugin_description = """Implement M600 for Snapmaker"""
 
 # The plugin's author.
 # Can be overwritten within OctoPrint's internal data via __plugin_author__ in the plugin module
@@ -29,7 +29,7 @@ plugin_author_email = "gatoygata2@gmail.com"
 
 # The plugin's homepage URL.
 # Can be overwritten within OctoPrint's internal data via __plugin_url__ in the plugin module
-plugin_url = "https://github.com/joaquinabian/RewriteM600"
+plugin_url = "https://github.com/joaquinabian/M600FilamentChange"
 
 # The plugin's license.
 # Can be overwritten within OctoPrint's internal data via __plugin_license__ in the plugin module

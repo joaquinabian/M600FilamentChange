@@ -1,4 +1,4 @@
-# RewriteM600
+# M600FilamentChange
 Implement M600 for printers that can't support M600 by default.
 M600 will stop the print and wait until you change and press resume.
 
