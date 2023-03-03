@@ -1,4 +1,4 @@
 include README.md
-recursive-include octoprint_M600FilamentChange/templates *
-recursive-include octoprint_M600FilamentChange/translations *
-recursive-include octoprint_M600FilamentChange/static *
+recursive-include octoprint_m600_filament_change/templates *
+recursive-include octoprint_m600_filament_change/translations *
+recursive-include octoprint_m600_filament_change/static *

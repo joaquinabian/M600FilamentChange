@@ -1,18 +1,22 @@
 # coding=utf-8
 
+
 from octoprint.plugin import StartupPlugin, AssetPlugin
 from octoprint.plugin import TemplatePlugin, SettingsPlugin
 from octoprint.util.comm import PositionRecord
 
 
-class M600FilamentChangePlugin(StartupPlugin, AssetPlugin, TemplatePlugin, SettingsPlugin):
+class M600_filament_changePlugin(StartupPlugin, AssetPlugin, TemplatePlugin, SettingsPlugin):
+    """"""
     def __init__(self):
         self.pause_position = PositionRecord()
         self.changing_filament = False
 
+    
     def on_after_startup(self):
         self._logger.info("Hello from M600FilamentChange!")
-
+    
+    
     def m600_catch(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
         if gcode and gcode == "M600":
             self._logger.info("M600 received")
@@ -26,7 +30,9 @@ class M600FilamentChangePlugin(StartupPlugin, AssetPlugin, TemplatePlugin, Setti
 
         return cmd
 
+
     def m600_hook(self, comm_instance, script_type, script_name, *args, **kwargs):
+        """"""
         self._logger.info("m600_hook %s: %s" % (script_type, script_name))
         #
         if script_type == "gcode" and script_name == "afterPrintPaused" and self.changing_filament:
@@ -93,11 +99,14 @@ class M600FilamentChangePlugin(StartupPlugin, AssetPlugin, TemplatePlugin, Setti
             if self.pause_position.f:
                 prefix.append("G0 F%f" % self.pause_position.f)
             return prefix, postfix
+    
 
     def get_settings_defaults(self):
+        """SettingsPlugin mixin"""
+        
         return dict(zDistance=10,
-                    toolChangeX=-10,
-                    toolChangeY=-10,
+                    x_park=-10,
+                    y_park=-10,
                     retractDistance=55,
                     DisableSteppers=False,
                     DisableX=False,
@@ -105,45 +114,63 @@ class M600FilamentChangePlugin(StartupPlugin, AssetPlugin, TemplatePlugin, Setti
                     DisableZ=False,
                     DisableE=False,
                     PostixEnableSteppers=False)
-
+  
+                    
     def get_template_configs(self):
+        """"""
+        self._logger.info("template_configs search in: %s" % self.get_template_folder())
+        
         return [dict(type="navbar", custom_bindings=False),
-                dict(type="settings", custom_bindings=False)]
+                dict(type="settings", custom_bindings=False)]                
+
 
     def get_assets(self):
-        """AssetPlugin mixin"""
-        return dict(js=["js/M600FilamentChange.js"])
-
-    def get_update_information(self):
-        """ Software Update hook.
-        
-        Define the configuration for your plugin to use with the Software Update 
+        """AssetPlugin mixin.
+        Define your plugin's asset files to automatically include in the
+        core UI here.
         """
-        m600_dict = dict(displayName="M600 Filament Change Plugin Quim",
-                         displayVersion=self._plugin_version,
-                         # version check: github repository
-                         type="github_release",
-                         user="joaquinabian",
-                         repo="M600FilamentChange",
-                         current=self._plugin_version,
-                         # update method: pip
-                         pip="https://github.com/joaquinabian/M600FilamentChange/archive/{target_version}.zip")
-        
-        return dict(M600FilamentChange=m600_dict)
+        return {
+            "js": ["js/m600_filament_change.js"],
+            "css": ["css/m600_filament_change.css"],
+            "less": ["less/m600_filament_change.less"]
+        }
+
+   
+    def get_update_information(self):
+        """Softwareupdate hook.
+        Define the configuration for your plugin to use with the Software Update
+        Plugin here. See https://docs.octoprint.org/en/master/bundledplugins/softwareupdate.html
+        for details.
+        """
+        return {
+            "m600_filament_change": {
+                "displayName": "M600_filament_change Plugin",
+                "displayVersion": self._plugin_version,
+
+                # version check: github repository
+                "type": "github_release",
+                "user": "joaquinabian",
+                "repo": "OctoPrint-M600_filament_change",
+                "current": self._plugin_version,
+
+                # update method: pip
+                "pip": "https://github.com/joaquinabian/OctoPrint-M600_filament_change/archive/{target_version}.zip",
+            }
+        }
 
 
-__plugin_name__ = "M600 Filament Change - Quim"
-__pluging_version__ = "2.0.0"
-__plugin_pythoncompat__ = ">=3.7,<4"
+# If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
+# ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
+# can be overwritten via __plugin_xyz__ control properties. See the documentation for that.
+__plugin_name__ = "M600_filament_change"
 
+__plugin_pythoncompat__ = ">=3,<4"  # Only Python 3
 
 def __plugin_load__():
     global __plugin_implementation__
-    __plugin_implementation__ = M600FilamentChangePlugin()
+    __plugin_implementation__ = M600_filament_changePlugin()
 
     global __plugin_hooks__
     __plugin_hooks__ = {
-        "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information,
-        "octoprint.comm.protocol.gcode.queuing": __plugin_implementation__.m600_catch,
-        "octoprint.comm.protocol.scripts":  __plugin_implementation__.m600_hook,
+        "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information
     }
